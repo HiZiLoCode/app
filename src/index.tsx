@@ -37,3 +37,4 @@ if (elem) {
   document.documentElement.dataset['themeMode'] = getThemeModeFromStore();
   updateCSSVariables(getThemeNameFromStore() as keyof typeof THEMES);
 }
+ 

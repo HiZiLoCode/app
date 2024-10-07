@@ -22,7 +22,9 @@ export default defineConfig({
   ],
   assetsInclude: ['**/*.glb'],
   envDir: '.',
-  server: {open: true},
+  server: {open: false,  
+    host: '0.0.0.0', // 确保应用程序可以被外部访问
+    port: 5887,},
   resolve: {
     alias: {
       src: path.resolve(__dirname, './src'),

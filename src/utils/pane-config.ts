@@ -44,7 +44,7 @@ export default [
     title: 'Settings',
   },
   {
-    key: 'Upload',
+    key: 'upload',
     component: UploadTab,
     icon: faUpload,
     path: '/upload',

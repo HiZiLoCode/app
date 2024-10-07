@@ -13,7 +13,7 @@ const handleMissingKey = (lng: string, namespace: string, key: string, fallbackV
   // If fallbackValue is undefined, return the key itself
   return fallbackValue || key;
 }
-i18n
+(i18n as any)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

@@ -35,7 +35,7 @@
     },
     {
       "route": "/test",
-      "rewrite": "/"
+      "rewrite": "/" 
     },
     {
       "route": "/design",

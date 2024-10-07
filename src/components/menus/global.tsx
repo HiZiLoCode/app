@@ -38,10 +38,10 @@ export const UnconnectedGlobalMenu = () => {
   const Panes = useMemo(() => {
     return PANES.filter((pane) => pane.key !== ErrorsPaneConfig.key).map(
       (pane) => {
-        console.log(pane.key === 'upload' && !showUploadTab);
+        console.log(pane.key === "upload" && !showUploadTab);
         
         if (pane.key === 'design' && !showDesignTab) return null;
-        if (pane.key === 'upload' && !showUploadTab) return null;
+        if (pane.key === "upload" && !showUploadTab) return null;
         if (pane.key === 'debug' && !showDebugPane) return null;
         return ( 
           <Link key={pane.key} to={pane.path}>

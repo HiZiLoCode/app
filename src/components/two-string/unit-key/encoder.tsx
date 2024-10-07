@@ -1,30 +1,33 @@
 import styled from 'styled-components';
 
+// EncoderKeyContainer用于包裹EncoderKey的主要容器
 const EncoderKeyContainer = styled.div`
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 52px;
-  opacity: 1;
-  height: 52px;
+  position: absolute; // 绝对定位
+  left: 0; // 距离左边缘0px
+  top: 0; // 距离上边缘0px
+  width: 52px; // 宽度设为52px
+  opacity: 1; // 不透明度设为1
+  height: 52px; // 高度设为52px
   &:hover {
-    z-index: 1;
-    animation: 0.75s infinite alternate select-glow;
+    z-index: 1; // 鼠标悬停时，z-index设为1，确保该元素位于其他元素之上
+    animation: 0.75s infinite alternate select-glow; // 鼠标悬停时应用动画效果
   }
 `;
 
+// EncoderKeyContent2用于显示EncoderKey的内容部分
 const EncoderKeyContent2 = styled.div<{$innerPadding: number; $size: number}>`
-  --inner-padding: ${(p) => p.$innerPadding}px;
-  --size: ${(p) => p.$size}px;
-  --inner-size: ${(p) => p.$size - p.$innerPadding * 2}px;
-  --half-size: ${(p) => (p.$size - p.$innerPadding * 2) / 2}px;
-  --half-size-p1: ${(p) => 1 + (p.$size - p.$innerPadding * 2) / 2}px;
+  // 使用CSS变量来定义尺寸和内边距
+  --inner-padding: ${(p) => p.$innerPadding}px; // 内边距
+  --size: ${(p) => p.$size}px; // 尺寸
+  --inner-size: ${(p) => p.$size - p.$innerPadding * 2}px; // 内部尺寸
+  --half-size: ${(p) => (p.$size - p.$innerPadding * 2) / 2}px; // 内部尺寸的一半
+  --half-size-p1: ${(p) => 1 + (p.$size - p.$innerPadding * 2) / 2}px; // 内部尺寸的一半，加1px
   --half-size-p05p: ${(p) =>
-    p.$innerPadding / 2 + (p.$size - p.$innerPadding * 2) / 2}px;
-  background-color: currentColor;
-  padding: var(--inner-padding);
-  min-width: var(--size);
-  min-height: var(--size);
+    p.$innerPadding / 2 + (p.$size - p.$innerPadding * 2) / 2}px; // 内部尺寸的一半，加上内边距的一半
+  background-color: currentColor; // 背景颜色与当前文字颜色相同
+  padding: var(--inner-padding); // 使用内边距变量
+  min-width: var(--size); // 最小宽度
+  min-height: var(--size); // 最小高度
   clip-path: polygon(
     50% 0%,
     46.93% 3.1%,
@@ -122,47 +125,49 @@ const EncoderKeyContent2 = styled.div<{$innerPadding: number; $size: number}>`
     59.17% 3.9%,
     56.53% 0.43%,
     53.07% 3.1%
-  );
+  ); // 使用clip-path定义多边形剪切路径
 
+  // 定义多个径向渐变背景
   background-image: radial-gradient(
       currentColor var(--half-size),
       transparent var(--half-size-p1)
-    ),
+    ), // 当前文字颜色的径向渐变
     radial-gradient(
-      rgba(255, 255, 255, 0.6) var(--half-size),
+      rgba(255, 255, 255, 0.6) var(--half-size), 
       transparent var(--half-size-p1)
-    ),
+    ),// 白色渐变
     radial-gradient(
-      rgba(0, 0, 0, 0.2) var(--half-size),
+      rgba(0, 0, 0, 0.2) var(--half-size), 
       transparent var(--half-size-p05p)
-    ),
+    ),// 黑色渐变
     radial-gradient(
-      rgba(0, 0, 0, 0.2) var(--half-size),
+      rgba(0, 0, 0, 0.2) var(--half-size), 
       transparent var(--half-size-p05p)
-    );
-  background-size: var(--size) var(--size);
+    );// 再次使用黑色渐变
+  background-size: var(--size) var(--size); // 背景图像的大小
   background-position: 0px 0px, -0.5px -0.5px, 0px 0px,
-    calc(var(--inner-padding) / 2) calc(var(--inner-padding) / 2);
-  background-repeat: repeat;
+    calc(var(--inner-padding) / 2) calc(var(--inner-padding) / 2); // 背景图像的位置
+  background-repeat: repeat; // 背景图像的重复方式
 
-  transition: transform 0.5s ease-out;
-  transform: rotate(0);
-  box-sizing: border-box;
+  transition: transform 0.5s ease-out; // 变换的过渡效果
+  transform: rotate(0); // 初始旋转角度为0
+  box-sizing: border-box; // 盒子模型使用border-box
   &:hover {
-    transform: rotate(450deg);
+    transform: rotate(450deg); // 鼠标悬停时旋转450度
   }
 `;
 
+// EncoderKey组件，用于显示编码器键
 export const EncoderKey = (props: {
-  size: number;
-  style: React.CSSProperties;
-  onClick: (evt: React.MouseEvent) => void;
+  size: number; // 键的尺寸
+  style: React.CSSProperties; // 外部样式
+  onClick: (evt: React.MouseEvent) => void; // 点击事件处理函数
 }) => {
   return (
     <EncoderKeyContainer onClick={props.onClick} style={props.style}>
       <EncoderKeyContent2
-        $size={props.size && +props.size}
-        $innerPadding={(5 * props.size) / 52}
+        $size={props.size && +props.size} // 将尺寸传递给EncoderKeyContent2
+        $innerPadding={(5 * props.size) / 52} // 根据尺寸计算内边距
       />
     </EncoderKeyContainer>
   );

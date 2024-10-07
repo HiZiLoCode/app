@@ -81,10 +81,10 @@ export const Settings = () => {
           label: '2D',
           value: '2D',
         },
-        {
-          label: '3D',
-          value: '3D',
-        },
+        // {
+        //   label: '3D',
+        //   value: '3D',
+        // },
       ]
     : [{label: '2D', value: '2D'}];
   const renderModeDefaultValue = renderModeOptions.find(
@@ -155,7 +155,7 @@ export const Settings = () => {
                 />
               </Detail>
             </ControlRow>
-            <ControlRow>
+            {/* <ControlRow>
               <Label>{t("Render Mode")}</Label>
               <Detail>
                 <AccentSelect
@@ -166,7 +166,7 @@ export const Settings = () => {
                   }}
                 />
               </Detail>
-            </ControlRow>
+            </ControlRow> */}
             <ControlRow>
               <Label>{t("Show Diagnostic Information")}</Label>
 

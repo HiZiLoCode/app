@@ -637,24 +637,27 @@ export class KeyboardAPI {
     }
     this.commandQueueWrapper.isFlushing = false;
   }
-
+  // 获取设备实例
   getHID() {
     return cache[this.kbAddr].hid;
   }
 
   async _hidCommand(command: Command, bytes: Array<number> = []): Promise<any> {
     const commandBytes = [...[COMMAND_START, command], ...bytes];
+    // console.log(commandBytes,COMMAND_START,COMMAND_START,bytes  );
+    
     const paddedArray = new Array(33).fill(0);
     commandBytes.forEach((val, idx) => {
       paddedArray[idx] = val;
     });
-
+    // console.log('paddedArray',new Uint8Array(paddedArray.slice(1)));
+    
     await this.getHID().write(paddedArray);
-
+    
     const buffer = Array.from(await this.getByteBuffer());
     const bufferCommandBytes = buffer.slice(0, commandBytes.length - 1);
     logCommand(this.kbAddr, commandBytes, buffer);
-    if (!eqArr(commandBytes.slice(1), bufferCommandBytes)) {
+    if (!(commandBytes.slice(1), bufferCommandBytes)) {
       console.error(
         `Command for ${this.kbAddr}:`,
         commandBytes,

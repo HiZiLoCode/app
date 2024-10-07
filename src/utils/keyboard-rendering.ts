@@ -53,6 +53,7 @@ export const getComboKeyProps = (
     | null
     | [[number, number, number, number], [number, number, number, number]];
 } => {
+  
   if (k.w2 === undefined || k.h2 === undefined) {
     return {clipPath: null, normalizedRects: null};
   }
@@ -83,6 +84,8 @@ export const getComboKeyProps = (
     [nx / boundingBoxWidth, (ny2 + nh2) / boundingBoxHeight],
     [nx2 / boundingBoxWidth, (ny2 + nh2) / boundingBoxHeight],
   ];
+  console.log(corners);
+  
   return {
     clipPath: getPolygonPath(corners),
     normalizedRects: [
@@ -450,85 +453,75 @@ const getLabelOffsets = (
 
 export const getLabel = (
   keycodeByte: number,
+  keycodeByteList: Array<number>,
   width: number,
   macroExpressions: string[],
   selectedDefinition: VIADefinitionV2 | VIADefinitionV3 | null,
   basicKeyToByte: Record<string, number>,
   byteToKey: Record<number, string>,
 ) => {
-  let label: string = '';
-  let size: number = 1.0;
+  let label = '';
+  let size = 1.0;
   let offset: [number, number] = [0, 0];
+  let tooltipLabels: string[] = [];
 
-  // Full name
-  let tooltipLabel: string = '';
-  if (
-    isCustomKeycodeByte(keycodeByte, basicKeyToByte) &&
-    selectedDefinition?.customKeycodes &&
-    selectedDefinition.customKeycodes[
-      getCustomKeycodeIndex(keycodeByte, basicKeyToByte)
-    ] !== undefined
-  ) {
-    const customKeycodeIdx = getCustomKeycodeIndex(keycodeByte, basicKeyToByte);
-    label = getShortNameForKeycode(
-      selectedDefinition.customKeycodes[customKeycodeIdx] as IKeycode,
-    );
-    tooltipLabel = getShortNameForKeycode(
-      selectedDefinition.customKeycodes[customKeycodeIdx] as IKeycode,
-      700,
-    );
+  // 使用 Map 缓存自定义按键和宏表达式的索引
+  const customKeycodes = selectedDefinition?.customKeycodes || [];
+  const macroKeycodeIndices = new Map<number, string>();
+
+  // 处理 keycodeByteList
+  for (const keycodeBytes of keycodeByteList) {
+    let tipLabel = '';
+
+    if (isCustomKeycodeByte(keycodeBytes, basicKeyToByte)) {
+      const idx = getCustomKeycodeIndex(keycodeBytes, basicKeyToByte);
+      if (idx !== undefined && customKeycodes[idx]) {
+        tipLabel = getShortNameForKeycode(customKeycodes[idx] as IKeycode, 700);
+      }
+    } else if (keycodeBytes) {
+      tipLabel = getLabelForByte(keycodeBytes, 700, basicKeyToByte, byteToKey) ?? '';
+    }
+
+    if (isMacroKeycodeByte(keycodeBytes, basicKeyToByte)) {
+      const macroIdx = getMacroKeycodeIndex(keycodeBytes, basicKeyToByte);
+      tipLabel = macroExpressions[macroIdx] || tipLabel;
+      macroKeycodeIndices.set(keycodeBytes, tipLabel);
+    }
+
+    tooltipLabels.push(tipLabel);
+  }
+
+  // 处理 keycodeByte
+  if (isCustomKeycodeByte(keycodeByte, basicKeyToByte)) {
+    const idx = getCustomKeycodeIndex(keycodeByte, basicKeyToByte);
+    if (idx !== undefined && customKeycodes[idx]) {
+      label = getShortNameForKeycode(customKeycodes[idx] as IKeycode);
+    }
   } else if (keycodeByte) {
-    label =
-      getLabelForByte(keycodeByte, width * 100, basicKeyToByte, byteToKey) ??
-      '';
-    tooltipLabel =
-      getLabelForByte(keycodeByte, 700, basicKeyToByte, byteToKey) ?? '';
+    label = getLabelForByte(keycodeByte, width * 100, basicKeyToByte, byteToKey) ?? '';
   }
-  let macroExpression: string | undefined;
+
   if (isMacroKeycodeByte(keycodeByte, basicKeyToByte)) {
-    const macroKeycodeIdx = getMacroKeycodeIndex(keycodeByte, basicKeyToByte);
-    macroExpression = macroExpressions[macroKeycodeIdx];
-    tooltipLabel = macroExpression || '';
+    const macroIdx = getMacroKeycodeIndex(keycodeByte, basicKeyToByte);
+    tooltipLabels.push(macroExpressions[macroIdx] || '');
   }
+
+  // 处理返回值
+  const result = {
+    tooltipLabels,
+    macroExpression: tooltipLabels.find(tip => tip.includes('macro')) || '',
+    key: label + tooltipLabels.join(''),
+  };
 
   if (isAlpha(label) || isNumpadNumber(label)) {
-    return (
-      label && {
-        label: label.toUpperCase(),
-        macroExpression,
-        key: (label || '') + (macroExpression || ''),
-        size: size,
-        offset: offset,
-      }
-    );
-  } else if (isMultiLegend(label)) {
-    const topLabel = label[0];
-    const bottomLabel = label[label.length - 1];
-    return (
-      bottomLabel && {
-        topLabel,
-        bottomLabel,
-        macroExpression,
-        key: (label || '') + (macroExpression || ''),
-        size: size,
-        offset: getLabelOffsets(topLabel, bottomLabel),
-      }
-    );
-  } else {
-    if (isNumpadSymbol(label)) {
-      size = 2.0;
-    }
-    if (isArrowKey(label)) {
-      size = 1.5;
-    }
-    return {
-      label,
-      centerLabel: label,
-      tooltipLabel,
-      macroExpression,
-      key: (label || '') + (macroExpression || ''),
-      size: size,
-      offset: offset,
-    };
+    return { ...result, label: label.toUpperCase(), size, offset };
   }
+  if (isMultiLegend(label)) {
+    const [topLabel, bottomLabel] = [label[0], label[label.length - 1]];
+    return { ...result, topLabel, bottomLabel, offset: getLabelOffsets(topLabel, bottomLabel), size };
+  }
+  if (isNumpadSymbol(label)) size = 2.0;
+  if (isArrowKey(label)) size = 1.5;
+
+  return { ...result, label, centerLabel: label, size, offset };
 };

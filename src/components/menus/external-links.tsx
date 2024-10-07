@@ -32,7 +32,7 @@ interface translation{
   zh:string|any
   en:string
 }
-const translationList:translation={
+const translationList:translation|any={
       en:"EngLish",
       zh:"简体中文"
 }

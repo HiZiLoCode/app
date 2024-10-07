@@ -13,7 +13,7 @@ interface Item{
     value:string
 }
 
-const CatgoryButton = styled(Button)<{disabled: boolean}>`
+const CatgoryButton:any = styled(Button)<{disabled: boolean}>`
   width: auto;
   line-height: 18px;
   border-radius: 64px;

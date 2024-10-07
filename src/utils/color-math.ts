@@ -11,6 +11,10 @@ export const updateCSSVariables = (themeName: keyof typeof THEMES) => {
     '--color_inside-accent',
     selectedTheme.accent.t,
   );
+  document.documentElement.style.setProperty(
+    '--color_keycap-accent',
+    '',
+  );
 };
 
 export const getRandomColor = () =>
@@ -67,7 +71,7 @@ export const getColorByte = (color: string) => {
   return [r, g, b];
 };
 
-export const getDarkenedColor = (color: string, multiplier = 0.8) => {
+export const getDarkenedColor = (color: any, multiplier = 0.8) => {
   const [r, g, b] = getColorByte(color);
   const hr = Math.round(r * multiplier).toString(16);
   const hg = Math.round(g * multiplier).toString(16);

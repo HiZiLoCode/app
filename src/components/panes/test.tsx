@@ -31,7 +31,7 @@ import {
 import {MenuContainer} from './configure-panes/custom/menu-generator';
 import {MenuTooltip} from '../inputs/tooltip';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faCircleQuestion} from '@fortawesome/free-solid-svg-icons';
+import {faCircleQuestion,faBoltLightning} from '@fortawesome/free-solid-svg-icons';
 import {useProgress} from '@react-three/drei';
 import {AccentSelect} from '../inputs/accent-select';
 import {AccentRange} from '../inputs/accent-range';
@@ -120,17 +120,23 @@ export const Test: FC = () => {
   ];
   const modeDefaultValue = modeOptions.find(
     (opt) => opt.value === testKeyboardSoundsSettings.mode,
-  );
+  );  
   const { t } = useTranslation();
   return progress !== 100 ? null : (
     <TestPane>
       <Grid>
         <MenuCell style={{pointerEvents: 'all'}}>
           <MenuContainer>
-            <Row $selected={true}>
+            <Row $selected={true} >
               <IconContainer>
                 <FontAwesomeIcon icon={faCircleQuestion} />
                 <MenuTooltip>{t('Check Key')}</MenuTooltip>
+              </IconContainer>
+            </Row>
+            <Row $selected={true} >
+              <IconContainer>
+                <FontAwesomeIcon icon={faBoltLightning} />
+                <MenuTooltip>{t('Fast Trigger')}</MenuTooltip>
               </IconContainer>
             </Row>
           </MenuContainer>
@@ -139,7 +145,7 @@ export const Test: FC = () => {
           <Container>
             <ControlRow>
               <Label>{t('Reset Keyboard')}</Label>
-              <Detail>
+              <Detail>         
                 <AccentButton onClick={testContextObj.clearTestKeys}>
                   {t('Reset')}
                 </AccentButton>
@@ -153,7 +159,7 @@ export const Test: FC = () => {
                     isChecked={isTestMatrixEnabled}
                     onChange={(val) => {
                       dispatch(setTestMatrixEnabled(val));
-                      testContextObj.clearTestKeys();
+                      testContextObj.clearTestKeys()  ;
                     }}
                   />
                 </Detail>

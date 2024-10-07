@@ -1,10 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import {title, component} from '../../icons/layouts';
-import {ControlRow, SpanOverflowCell, Label, Detail} from '../grid';
-import {AccentSlider} from '../../inputs/accent-slider';
-import {AccentSelect} from '../../inputs/accent-select';
-import {CenterPane} from '../pane';
+import {title, component} from 'src/components/icons/layouts';
+import {ControlRow, SpanOverflowCell, Label, Detail} from '../../../grid';
+import {AccentSlider} from '../../../../inputs/accent-slider';
+import {AccentSelect} from '../../../../inputs/accent-select';
+import {CenterPane} from '../../../pane';
 import {
   getSelectedDefinition,
   getSelectedLayoutOptions,

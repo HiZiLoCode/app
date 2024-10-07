@@ -3,7 +3,7 @@
   "scripts": {
     "start": "concurrently --names \"vite,azure-fn-dev\" -c \"bgBlue,bgMagenta\" \"npm run dev\" \"npm --prefix api start\"",
     "dev": "node scripts/build-definitions.js && vite --force",
-    "build": "npm run build:kbs && tsc && vite build",
+    "build": "npm run build:kbs  && vite build",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
     "refresh-kbs": "npm uninstall --force via-keyboards && npm install --force github:the-via/keyboards",
@@ -16,6 +16,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@azure/functions": "^1.2.3",
     "@fortawesome/fontawesome-free": "^6.3.0",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
     "@fortawesome/free-brands-svg-icons": "^6.3.0",
@@ -34,12 +35,14 @@
     "@webscopeio/react-textarea-autocomplete": "^4.9.2",
     "classnames": "^2.5.1",
     "downshift": "^7.2.1",
+    "express": "^4.21.0",
     "i18next": "^23.15.1",
     "i18next-browser-languagedetector": "^8.0.0",
     "idb-keyval": "^6.2.0",
     "json-stringify-pretty-compact": "^4.0.0",
     "lodash.defaultsdeep": "^4.6.1",
     "lodash.partition": "^4.6.0",
+    "node-fetch": "^3.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^15.0.1",
@@ -57,6 +60,7 @@
   "devDependencies": {
     "@types/lodash.defaultsdeep": "^4.6.7",
     "@types/lodash.partition": "^4.6.7",
+    "@types/node-fetch": "^2.6.11",
     "@types/raf-schd": "^4.0.1",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",

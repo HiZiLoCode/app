@@ -337,22 +337,25 @@ export function getShortNameForKeycode(keycode: IKeycode, size = 100) {
 }
 
 export function getOtherMenu(
-  basicKeyToByte: Record<string, number>,
+  basicKeyToByte: Record<string, number>, // 接受一个键码映射表，键是字符串，值是数字
 ): IKeycodeMenu {
+  // 通过过滤和映射 basicKeyToByte 的键，生成 keycodes 列表
   const keycodes = Object.keys(basicKeyToByte)
-    .filter((key) => !key.startsWith('_QK'))
-    .filter((key) => !keycodesList.map(({code}) => code).includes(key))
+    .filter((key) => !key.startsWith('_QK')) // 过滤掉以 "_QK" 开头的键
+    .filter((key) => !keycodesList.map(({code}) => code).includes(key)) // 过滤掉已经在 keycodesList 中存在的键
     .map((code) => ({
-      name: code.replace('KC_', '').replace(/_/g, ' '),
-      code: code,
+      name: code.replace('KC_', '').replace(/_/g, ' '), // 将键名中的 'KC_' 去掉，并将下划线替换为空格
+      code: code, // 保留原始键码
     }));
 
+  // 返回一个键码菜单对象，包含 id、label 和处理过的 keycodes 列表
   return {
-    id: 'other',
-    label: 'Other',
-    keycodes,
+    id: 'other', // 菜单的 ID 设置为 'other'
+    label: 'Other', // 菜单的标签设置为 'Other'
+    keycodes, // 过滤和处理后的 keycodes 列表
   };
 }
+
 
 function buildLayerMenu(): IKeycodeMenu {
   const hardCodedKeycodes: IKeycode[] = [

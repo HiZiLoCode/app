@@ -159,7 +159,7 @@ export const reloadConnectedDevices =
         return {
           path,
           productId,
-          vendorId,
+          vendorId,  
           protocol,
           productName,
           hasResolvedDefinition: false,
@@ -184,7 +184,7 @@ export const reloadConnectedDevices =
           hasResolvedDefinition: true,
         };
         return devices;
-      }, {});
+      }, {});        
 
     // Remove authorized devices that we could not find definitions for
     authorizedDevices

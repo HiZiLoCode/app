@@ -1,10 +1,6 @@
 
 
-# usevia.app
-[![Azure Static Web Apps CI/CD](https://github.com/the-via/app/actions/workflows/azure.yml/badge.svg)](https://github.com/the-via/app/actions/workflows/azure.yml)
-
-![android-chrome-192x192](https://user-images.githubusercontent.com/1714072/222621960-ddfb8ee6-a486-4c66-8852-b204ba7c807b.png)
-
+# app
 ## Useful commands
 ### `npm run start`
 
@@ -25,6 +21,3 @@ Your app is ready to be deployed!
 Launches the application test runner.
 Run with the `--watch` flag (`npm test -- --watch`) to run in interactive watch mode.
 
-#
-
-This project is tested with [BrowserStack](https://www.browserstack.com/).

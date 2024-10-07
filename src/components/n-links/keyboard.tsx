@@ -1,88 +1,113 @@
-import {useCallback, useContext, useEffect, useMemo} from 'react';
-import {matrixKeycodes} from 'src/utils/key-event';
-import fullKeyboardDefinition from '../../utils/test-keyboard-definition.json';
-import {VIAKey, DefinitionVersionMap} from '@the-via/reader';
-import {useAppDispatch, useAppSelector} from 'src/store/hooks';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
+import { matrixKeycodes } from 'src/utils/key-event'; // 导入键盘事件相关的键码
+import fullKeyboardDefinition from '../../utils/test-keyboard-definition.json'; // 导入完整的键盘定义数据
+import { VIAKey, DefinitionVersionMap } from '@the-via/reader'; // 导入VIA键盘和定义版本映射的类型
+import { useAppDispatch, useAppSelector } from 'src/store/hooks'; // 自定义 hooks，用于访问 Redux store
 import {
   getSelectedKeyDefinitions,
   getSelectedDefinition,
   getCustomDefinitions,
-} from 'src/store/definitionsSlice';
-import type {VIADefinitionV2, VIADefinitionV3} from '@the-via/reader';
+} from 'src/store/definitionsSlice'; // 从 Redux store 获取选定的键定义和自定义定义
+import type { VIADefinitionV2, VIADefinitionV3 } from '@the-via/reader'; // 类型定义
 import {
   getSelectedKeymap,
+  getSelectedKeymapList,
   getSelectedPaletteColor,
   setLayer,
-} from 'src/store/keymapSlice';
-import {KeyboardCanvas as StringKeyboardCanvas} from '../two-string/keyboard-canvas';
-import {KeyboardCanvas as FiberKeyboardCanvas} from '../three-fiber/keyboard-canvas';
-import {useLocation} from 'wouter';
+} from 'src/store/keymapSlice'; // 从 Redux store 获取选定的键图和调色板颜色，并设置图层
+import { KeyboardCanvas as StringKeyboardCanvas } from '../two-string/keyboard-canvas'; // 导入2D键盘画布组件
+import { KeyboardCanvas as FiberKeyboardCanvas } from '../three-fiber/keyboard-canvas'; // 导入3D键盘画布组件
+import { useLocation } from 'wouter'; // 导入路由位置 hook
 import {
   getSelectedConnectedDevice,
   getSelectedKeyboardAPI,
-} from 'src/store/devicesSlice';
+} from 'src/store/devicesSlice'; // 从 Redux store 获取选定的连接设备和键盘 API
 import {
   getDesignDefinitionVersion,
   getIsTestMatrixEnabled,
   getTestKeyboardSoundsSettings,
   setTestMatrixEnabled,
-} from 'src/store/settingsSlice';
+} from 'src/store/settingsSlice'; // 从 Redux store 获取设计定义版本、测试矩阵状态和测试键盘声音设置
 import {
   getDesignSelectedOptionKeys,
   getSelectedDefinitionIndex,
   getShowMatrix,
-} from 'src/store/designSlice';
-import {useGlobalKeys} from 'src/utils/use-global-keys';
-import {useMatrixTest} from 'src/utils/use-matrix-test';
-import {TestContext} from '../panes/test';
-import {TestKeyState} from 'src/types/types';
-import {useColorPainter} from 'src/utils/use-color-painter';
-import {getShowKeyPainter} from 'src/store/menusSlice';
-import {TestKeyboardSounds} from 'src/components/void/test-keyboard-sounds';
-import {DisplayMode, NDimension} from 'src/types/keyboard-rendering';
-import {getKeyboardRowPartitions} from 'src/utils/keyboard-rendering';
+} from 'src/store/designSlice'; // 从 Redux store 获取设计选择的选项键、选定的定义索引和显示矩阵设置
+import { useGlobalKeys } from 'src/utils/use-global-keys'; // 自定义 hook，用于处理全局按键
+import { useMatrixTest } from 'src/utils/use-matrix-test'; // 自定义 hook，用于处理矩阵测试
+import { TestContext } from '../panes/test'; // 导入测试上下文
+import { TestKeyState } from 'src/types/types'; // 测试键状态类型定义
+import { useColorPainter } from 'src/utils/use-color-painter'; // 自定义 hook，用于处理颜色绘制
+import { getShowKeyPainter } from 'src/store/menusSlice'; // 从 Redux store 获取是否显示键绘制器的设置
+import { TestKeyboardSounds } from 'src/components/void/test-keyboard-sounds'; // 导入测试键盘声音组件
+import { DisplayMode, NDimension } from 'src/types/keyboard-rendering'; // 键盘渲染的显示模式和维度类型
+import { getKeyboardRowPartitions } from 'src/utils/keyboard-rendering'; // 自定义工具函数，用于获取键盘行分区
 
+// 根据维度选择键盘画布组件
 const getKeyboardCanvas = (dimension: '2D' | '3D') =>
   dimension === '2D' ? StringKeyboardCanvas : FiberKeyboardCanvas;
 
 export const ConfigureKeyboard = (props: {
-  selectable?: boolean;
-  dimensions?: DOMRect;
-  nDimension: NDimension;
+  selectable?: boolean; // 是否可选择
+  dimensions?: DOMRect; // 键盘的尺寸
+  nDimension: NDimension; // 键盘的维度类型
 }) => {
-  const {selectable, dimensions} = props;
+  const { selectable, dimensions } = props;
+  
+  // 从 Redux 状态中获取选定的键图
   const matrixKeycodes = useAppSelector(
     (state) => getSelectedKeymap(state) || [],
   );
-  const keys: (VIAKey & {ei?: number})[] = useAppSelector(
+
+  const matrixKeycodesList = useAppSelector(
+    (state) => getSelectedKeymapList(state) || [],
+  );
+  console.log(matrixKeycodesList);
+  
+  // 从 Redux 状态中获取选定的键定义
+  const keys: (VIAKey & { ei?: number })[] = useAppSelector(
     getSelectedKeyDefinitions,
   );
+
+  // 从 Redux 状态中获取选定的键盘定义
   const definition = useAppSelector(getSelectedDefinition);
+  
+  // 获取是否显示键绘制器的设置
   const showKeyPainter = useAppSelector(getShowKeyPainter);
+  
+  // 获取选定的调色板颜色
   const selectedPaletteColor = useAppSelector(getSelectedPaletteColor);
-  const {keyColors, onKeycapPointerDown, onKeycapPointerOver} = useColorPainter(
+
+  // 使用颜色绘制器来处理键盘的颜色
+  const { keyColors, onKeycapPointerDown, onKeycapPointerOver } = useColorPainter(
     keys,
     selectedPaletteColor,
   );
+
+  // 归一化键和颜色，过滤掉没有颜色的键
   const [normalizedKeys, normalizedColors] = useMemo(() => {
-    // skip keys without colors on it
     return keyColors && keys
       ? [
-          keys.filter((_, i) => keyColors[i] && keyColors[i].length),
-          keyColors.filter((i) => i && i.length),
+          keys.filter((_, i) => keyColors[i] && keyColors[i].length), // 过滤有颜色的键
+          keyColors.filter((i) => i && i.length), // 过滤有颜色的数组
         ]
       : [null, null];
   }, [keys, keyColors]);
 
+  // 如果没有定义或尺寸，则返回 null
   if (!definition || !dimensions) {
-    return null;
+    return null; 
   }
 
-  const KeyboardCanvas = getKeyboardCanvas(props.nDimension);
+  // 选择对应的键盘画布组件
+  
+  const KeyboardCanvas = getKeyboardCanvas(props.nDimension);  
   return (
     <>
+      {/* 渲染键盘画布，传入必要的属性 */}
       <KeyboardCanvas
         matrixKeycodes={matrixKeycodes}
+        matrixKeycodesList={matrixKeycodesList}
         keys={keys}
         selectable={!!selectable}
         definition={definition}
@@ -90,12 +115,14 @@ export const ConfigureKeyboard = (props: {
         mode={DisplayMode.Configure}
         shouldHide={showKeyPainter}
       />
+      {/* 如果存在归一化的键和颜色，则渲染另一个键盘画布 */}
       {normalizedKeys &&
       normalizedKeys.length &&
       normalizedColors &&
       normalizedColors.length ? (
         <KeyboardCanvas
           matrixKeycodes={matrixKeycodes}
+          matrixKeycodesList={matrixKeycodesList}
           keys={normalizedKeys}
           selectable={showKeyPainter}
           definition={definition}
@@ -111,12 +138,13 @@ export const ConfigureKeyboard = (props: {
   );
 };
 
+
 const TestKeyboard = (props: {
   selectable?: boolean;
   containerDimensions?: DOMRect;
   pressedKeys?: TestKeyState[];
   matrixKeycodes: number[];
-  keys: (VIAKey & {ei?: number})[];
+  keys: (VIAKey & { ei?: number })[];
   definition: VIADefinitionV2 | VIADefinitionV3;
   nDimension: NDimension;
 }) => {
@@ -129,23 +157,29 @@ const TestKeyboard = (props: {
     definition,
     nDimension,
   } = props;
+
+  // 如果容器的尺寸未定义，则不渲染任何内容
   if (!containerDimensions) {
     return null;
   }
 
+  // 选择适当的键盘画布组件（2D 或 3D）
   const KeyboardCanvas = getKeyboardCanvas(nDimension);
+
   return (
     <KeyboardCanvas
-      matrixKeycodes={matrixKeycodes}
-      keys={keys}
-      selectable={!!selectable}
-      definition={definition}
-      pressedKeys={pressedKeys}
-      containerDimensions={containerDimensions}
-      mode={DisplayMode.Test}
+      matrixKeycodes={matrixKeycodes}   // 键盘的矩阵键码
+      keys={keys}                       // 键的定义
+      selectable={!!selectable}         // 是否允许选择键
+      definition={definition}           // 键盘的定义
+      pressedKeys={pressedKeys}         // 当前被按下的键
+      containerDimensions={containerDimensions}  // 画布容器的尺寸
+      mode={DisplayMode.Test}           // 渲染模式，测试模式
     />
   );
 };
+
+
 const DesignKeyboard = (props: {
   containerDimensions?: DOMRect;
   definition: VIADefinitionV2 | VIADefinitionV3;
@@ -153,20 +187,22 @@ const DesignKeyboard = (props: {
   selectedOptionKeys: number[];
   nDimension: NDimension;
 }) => {
-  const {containerDimensions, showMatrix, definition, selectedOptionKeys} =
-    props;
-  const {keys, optionKeys} = definition.layouts;
+  const { containerDimensions, showMatrix, definition, selectedOptionKeys } = props;
+  const { keys, optionKeys } = definition.layouts;
+
+  // 如果容器的尺寸未定义，则不渲染任何内容
   if (!containerDimensions) {
     return null;
   }
 
+  // 使用 `useMemo` 来优化性能，计算显示的选项键
   const displayedOptionKeys = useMemo(
     () =>
       optionKeys
         ? Object.entries(optionKeys).flatMap(([key, options]) => {
             const optionKey = parseInt(key);
 
-            // If a selection option has been set for this optionKey, use that
+            // 如果选项键已被选择，则使用已选择的选项
             return selectedOptionKeys[optionKey]
               ? options[selectedOptionKeys[optionKey]]
               : options[0];
@@ -175,32 +211,40 @@ const DesignKeyboard = (props: {
     [optionKeys, selectedOptionKeys],
   );
 
+  // 计算最终要显示的键
   const displayedKeys = useMemo(() => {
     return [...keys, ...displayedOptionKeys];
   }, [keys, displayedOptionKeys]);
+
+  // 选择适当的键盘画布组件（2D 或 3D）
   const KeyboardCanvas = getKeyboardCanvas(props.nDimension);
+
   return (
     <KeyboardCanvas
-      matrixKeycodes={EMPTY_ARR}
-      keys={displayedKeys}
-      selectable={false}
-      definition={definition}
-      containerDimensions={containerDimensions}
-      mode={DisplayMode.Design}
-      showMatrix={showMatrix}
+      matrixKeycodes={EMPTY_ARR}          // 空的矩阵键码数组
+      keys={displayedKeys}                // 需要显示的键
+      selectable={false}                 // 不允许选择键
+      definition={definition}            // 键盘的定义
+      containerDimensions={containerDimensions}  // 画布容器的尺寸
+      mode={DisplayMode.Design}          // 渲染模式，设计模式
+      showMatrix={showMatrix}            // 是否显示矩阵
     />
   );
 };
+
 
 export const Design = (props: {
   dimensions?: DOMRect;
   nDimension: NDimension;
 }) => {
+  // 从 Redux store 获取本地定义、设计定义版本、选定定义索引、选择的选项键和是否显示矩阵
   const localDefinitions = Object.values(useAppSelector(getCustomDefinitions));
   const definitionVersion = useAppSelector(getDesignDefinitionVersion);
   const selectedDefinitionIndex = useAppSelector(getSelectedDefinitionIndex);
   const selectedOptionKeys = useAppSelector(getDesignSelectedOptionKeys);
   const showMatrix = useAppSelector(getShowMatrix);
+
+  // 计算版本定义
   const versionDefinitions: DefinitionVersionMap[] = useMemo(
     () =>
       localDefinitions.filter(
@@ -209,6 +253,7 @@ export const Design = (props: {
     [localDefinitions, definitionVersion],
   );
 
+  // 选择当前定义
   const definition =
     versionDefinitions[selectedDefinitionIndex] &&
     versionDefinitions[selectedDefinitionIndex][definitionVersion];
@@ -227,47 +272,68 @@ export const Design = (props: {
 };
 
 const EMPTY_ARR = [] as any[];
-export const Test = (props: {dimensions?: DOMRect; nDimension: NDimension}) => {
-  const dispatch = useAppDispatch();
-  const [path] = useLocation();
-  const isShowingTest = path === '/test';
-  const api = useAppSelector(getSelectedKeyboardAPI);
-  const device = useAppSelector(getSelectedConnectedDevice);
-  const selectedDefinition = useAppSelector(getSelectedDefinition);
-  const keyDefinitions = useAppSelector(getSelectedKeyDefinitions);
-  const isTestMatrixEnabled = useAppSelector(getIsTestMatrixEnabled);
-  const testKeyboardSoundsSettings = useAppSelector(
-    getTestKeyboardSoundsSettings,
-  );
-  const selectedMatrixKeycodes = useAppSelector(
-    (state) => getSelectedKeymap(state) || [],
-  );
+export const Test = (props: { dimensions?: DOMRect; nDimension: NDimension }) => {
+  // 从 Redux store 获取 dispatch 函数，用于分发 actions
+  const dispatch = useAppDispatch(); 
 
+  // 使用路由 hook 获取当前路径
+  const [path] = useLocation(); 
+
+  // 判断当前路径是否为测试页面
+  const isShowingTest = path === '/test'; 
+
+  // 从 Redux store 获取选定的键盘 API
+  const api = useAppSelector(getSelectedKeyboardAPI); 
+
+  // 从 Redux store 获取选定的连接设备
+  const device = useAppSelector(getSelectedConnectedDevice); 
+
+  // 从 Redux store 获取选定的键盘定义
+  const selectedDefinition = useAppSelector(getSelectedDefinition); 
+
+  // 从 Redux store 获取选定的键定义
+  const keyDefinitions = useAppSelector(getSelectedKeyDefinitions); 
+
+  // 从 Redux store 检查测试矩阵是否启用
+  const isTestMatrixEnabled = useAppSelector(getIsTestMatrixEnabled); 
+
+  // 从 Redux store 获取测试键盘声音设置
+  const testKeyboardSoundsSettings = useAppSelector(getTestKeyboardSoundsSettings); 
+
+  // 从 Redux store 获取选定的矩阵键码
+  const selectedMatrixKeycodes = useAppSelector(
+    (state) => getSelectedKeymap(state) || []
+  ); 
+
+  // 使用自定义 hook 管理全局按键状态
   const [globalPressedKeys, setGlobalPressedKeys] = useGlobalKeys(
-    !isTestMatrixEnabled && isShowingTest,
-  );
+    !isTestMatrixEnabled && isShowingTest
+  ); 
+
+  // 使用自定义 hook 管理矩阵按键状态
   const [matrixPressedKeys, setMatrixPressedKeys] = useMatrixTest(
     isTestMatrixEnabled && isShowingTest,
     api as any,
     device as any,
-    selectedDefinition as any,
-  );
+    selectedDefinition as any
+  ); 
 
+  // 清除测试按键的回调函数
   const clearTestKeys = useCallback(() => {
     setGlobalPressedKeys(EMPTY_ARR);
     setMatrixPressedKeys(EMPTY_ARR);
-  }, [setGlobalPressedKeys, setMatrixPressedKeys]);
-
+  }, [setGlobalPressedKeys, setMatrixPressedKeys]); 
+  
+  // 使用上下文获取测试上下文并更新清除测试键函数
   const testContext = useContext(TestContext);
-  //// Hack to share setting a local state to avoid causing cascade of rerender
   useEffect(() => {
     if (testContext[0].clearTestKeys !== clearTestKeys) {
-      testContext[1]({clearTestKeys});
+      testContext[1]({ clearTestKeys });
     }
   }, [testContext, clearTestKeys]);
 
+  // 路径变化时，禁用测试矩阵并清除测试键
   useEffect(() => {
-    // Remove event listeners on cleanup
     if (path !== '/test') {
       dispatch(setTestMatrixEnabled(false));
       testContext[0].clearTestKeys();
@@ -275,20 +341,22 @@ export const Test = (props: {dimensions?: DOMRect; nDimension: NDimension}) => {
     if (path !== '/') {
       dispatch(setLayer(0));
     }
-  }, [path]); // Empty array ensures that effect is only run on mount and unmount
+  }, [path]);
 
+  // 根据测试矩阵是否启用映射矩阵按键状态
   const matrixPressedKeysMapped =
     isTestMatrixEnabled && keyDefinitions
       ? keyDefinitions.map(
-          ({row, col}: {row: number; col: number}) =>
+          ({ row, col }: { row: number; col: number }) =>
             selectedDefinition &&
             matrixPressedKeys[
               (row * selectedDefinition.matrix.cols +
                 col) as keyof typeof matrixPressedKeys
-            ],
+            ]
         )
-      : [];
-
+      : []; 
+  
+  // 根据测试矩阵状态选择测试定义和键
   const testDefinition = isTestMatrixEnabled
     ? selectedDefinition
     : fullKeyboardDefinition;
@@ -297,34 +365,40 @@ export const Test = (props: {dimensions?: DOMRect; nDimension: NDimension}) => {
     : fullKeyboardDefinition.layouts.keys;
 
   if (!testDefinition || typeof testDefinition === 'string') {
-    return null;
+    return null; // 如果定义无效或类型错误，返回 null
   }
 
+  // 根据测试矩阵状态选择按键状态
   const testPressedKeys = isTestMatrixEnabled
     ? (matrixPressedKeysMapped as TestKeyState[])
     : (globalPressedKeys as TestKeyState[]);
 
-  const {partitionedKeys} = useMemo(
+  // 使用自定义工具函数获取键盘行分区
+  const { partitionedKeys } = useMemo(
     () => getKeyboardRowPartitions(testKeys as VIAKey[]),
-    [testKeys],
+    [testKeys]
   );
+
+  // 根据测试矩阵状态处理按键状态
   const testPressedKeys2 = isTestMatrixEnabled
     ? (matrixPressedKeys as TestKeyState[])
     : (globalPressedKeys as TestKeyState[]);
+
+  // 按行分区按键状态
   const partitionedPressedKeys: TestKeyState[][] = partitionedKeys.map(
     (rowArray) => {
       return rowArray.map(
-        ({row, col}: {row: number; col: number}) =>
+        ({ row, col }: { row: number; col: number }) =>
           testPressedKeys2[
-            (row * testDefinition.matrix.cols +
-              col) as keyof typeof testPressedKeys2
-          ],
+            (row * testDefinition.matrix.cols + col) as keyof typeof testPressedKeys2
+          ]
       ) as TestKeyState[];
-    },
+    }
   );
 
   return (
     <>
+      {/* 渲染测试键盘组件 */}
       <TestKeyboard
         definition={testDefinition as VIADefinitionV2}
         keys={testKeys as VIAKey[]}
@@ -335,9 +409,11 @@ export const Test = (props: {dimensions?: DOMRect; nDimension: NDimension}) => {
         containerDimensions={props.dimensions}
         nDimension={props.nDimension}
       />
+      {/* 如果启用了测试键盘声音设置，则渲染测试键盘声音组件 */}
       {partitionedPressedKeys && testKeyboardSoundsSettings.isEnabled && (
         <TestKeyboardSounds pressedKeys={partitionedPressedKeys} />
       )}
     </>
   );
 };
+

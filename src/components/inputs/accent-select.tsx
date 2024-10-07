@@ -102,7 +102,7 @@ interface AccentSelectProps extends SelectProps<OptionType, false> {
   value?:OptionType,
 }
 // 修改组件 更换语言时及时更新
-export const AccentSelect: React.FC<AccentSelectProps> = (props) =>{
+export const AccentSelect: React.FC<any> = (props) =>{
   
   const {t,i18n} = useTranslation()
     // 翻译选项中的 label

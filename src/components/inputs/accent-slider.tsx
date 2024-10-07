@@ -46,7 +46,7 @@ type Props = {
   onChange: (val: boolean) => void;
 };
 
-export function AccentSlider(props: Props) {
+export function AccentSlider(props: Props):JSX.Element  {
   const {isChecked, onChange} = props;
 
   const [isHiddenChecked, setIsHiddenChecked] = React.useState(isChecked);
